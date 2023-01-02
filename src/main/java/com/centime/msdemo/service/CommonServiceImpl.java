@@ -2,6 +2,8 @@ package com.centime.msdemo.service;
 
 import java.util.Arrays;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -29,6 +31,8 @@ public class CommonServiceImpl implements CommonService {
 	@Value("${app.server.service.3.url}")
 	private String thirdService;
 
+	private static final Logger logger = LoggerFactory.getLogger(CommonServiceImpl.class);
+
 	@Override
 	@LogIt
 	public ResponseEntity<String> getConcatinatedResponse(Person person) {
@@ -39,6 +43,7 @@ public class CommonServiceImpl implements CommonService {
 		if (secondServiceEntity.getStatusCode() == HttpStatus.OK) {
 			greeting = secondServiceEntity.getBody();
 		} else {
+			logger.error("error in callling getSecondServiceResponse");
 			return new ResponseEntity<>(secondServiceEntity.getBody(), secondServiceEntity.getStatusCode());
 		}
 
@@ -46,6 +51,7 @@ public class CommonServiceImpl implements CommonService {
 		if (thirdServiceEntity.getStatusCode() == HttpStatus.OK) {
 			greeting = greeting + thirdServiceEntity.getBody();
 		} else {
+			logger.error("error in callling getThirdServiceResponse");
 			return new ResponseEntity<>(thirdServiceEntity.getBody(), thirdServiceEntity.getStatusCode());
 		}
 		return new ResponseEntity<>(greeting, HttpStatus.OK);
@@ -61,6 +67,7 @@ public class CommonServiceImpl implements CommonService {
 					.exchange(secondService + "api/second-service/", HttpMethod.GET, entity, String.class).getBody(),
 					HttpStatus.OK);
 		} catch (HttpStatusCodeException e) {
+			logger.error("error in callling getSecondServiceResponse--->{}", e.getMessage());
 			return ResponseEntity.status(e.getRawStatusCode()).headers(e.getResponseHeaders())
 					.body(e.getResponseBodyAsString());
 		}
@@ -77,6 +84,7 @@ public class CommonServiceImpl implements CommonService {
 					.exchange(thirdService + "api/third-service/", HttpMethod.POST, entityPost, String.class).getBody(),
 					HttpStatus.OK);
 		} catch (HttpStatusCodeException e) {
+			logger.error("error in callling getThirdServiceResponse--->{}", e.getMessage());
 			return ResponseEntity.status(e.getRawStatusCode()).headers(e.getResponseHeaders())
 					.body(e.getResponseBodyAsString());
 		}
